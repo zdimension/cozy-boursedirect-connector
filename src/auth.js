@@ -23,7 +23,7 @@ module.exports = {
     await page.waitForTimeout(1000)
     try {
       await page.waitForFunction(`window.location.href === "${walletUrl}"`, {
-        timeout: 1000
+        timeout: 5000
       })
     } catch (e) {
       log('info', 'Not logged in, logging in...')
