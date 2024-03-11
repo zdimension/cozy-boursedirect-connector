@@ -35,7 +35,6 @@ class SwileConnector extends BaseKonnector {
 
       const accounts = this.parseAccounts(cards)
       const operations = this.parseOps(ops)
-      log('info', operations)
       const categorizedTransactions = await categorize(operations)
       const { accounts: savedAccounts } = await reconciliator.save(
         accounts,
