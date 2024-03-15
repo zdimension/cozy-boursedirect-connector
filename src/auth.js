@@ -20,9 +20,9 @@ module.exports = {
     let page = await browser.newPage()
 
     page.on('response', response => {
-      if (response.url().endsWith("/token"))
+      if (response.url().endsWith('/token'))
         log('info', `Token value: ${response.json()} `)
-    });
+    })
 
     await page.goto(walletUrl)
     // wait for idle

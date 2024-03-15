@@ -1,6 +1,7 @@
 const { log } = require('cozy-konnector-libs')
 
-const API_ROOT = 'https://monere-api.epargne-retraite-entreprises.bnpparibas.com/api/v1'
+const API_ROOT =
+  'https://monere-api.epargne-retraite-entreprises.bnpparibas.com/api/v1'
 
 class BNPEREApi {
   constructor(email, token) {
