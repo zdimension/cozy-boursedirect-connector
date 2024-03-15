@@ -1,8 +1,8 @@
 const { log } = require('cozy-konnector-libs')
 
-const API_ROOT = 'https://neobank-api.swile.co/api'
+const API_ROOT = 'https://monere-api.epargne-retraite-entreprises.bnpparibas.com/api/v1'
 
-class SwileApi {
+class BNPEREApi {
   constructor(email, token) {
     this.email = email
     this.token = token
@@ -31,37 +31,37 @@ class SwileApi {
   }
 
   async getCards() {
-    return (await this.fetch(`v0/wallets`)).wallets.filter(
-      w => w.id !== 'null-wallet'
+    return await this.fetch(`cards?wallet_result_level=full`)
+  }
+
+  async getOperations(card) {
+    const reqRes = await this.fetch(
+      `accounts/${card.class}-${card.account_ref}/operations`
+    )
+    return reqRes.filter(
+      op => op.status === 'success' && op.cleared_status === 'cleared'
     )
   }
 
   async getAllOperations() {
-    return (await this.fetch(`v3/user/operations?per=999999`)).items.filter(
-      op => {
-        op.transactions = op.transactions.filter(t => t.type === 'ORIGIN')
-        if (op.transactions.length !== 1) {
-          log(
-            'warn',
-            `operation ${op.id} has ${op.transactions.length} transactions`
-          )
-          return false
+    const cards = await this.getCards()
+    await Promise.all(
+      cards.map(async card => {
+        card.operations = await this.getOperations(card)
+        for (let op of card.operations) {
+          op.card = card
         }
-        const transaction = op.transactions[0]
-        return (
-          transaction.status === 'CAPTURED' ||
-          transaction.status === 'VALIDATED'
-        )
-      }
+      })
     )
+    return cards
   }
 }
 
-async function getSwileData(email, token) {
-  const api = new SwileApi(email, token)
+async function getBNPEREData(email, token) {
+  const api = new BNPEREApi(email, token)
   return [await api.getCards(), await api.getAllOperations()]
 }
 
 module.exports = {
-  getSwileData
+  getBNPEREData
 }

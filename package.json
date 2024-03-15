@@ -1,14 +1,14 @@
 {
-  "name": "cozy-swile-connector",
+  "name": "cozy-bnpere-connector",
   "version": "0.1.0",
   "description": "",
   "repository": {
     "type": "git",
-    "url": "git@github.com:zdimension/cozy-swile-connector.git"
+    "url": "git@github.com:zdimension/cozy-bnpere-connector.git"
   },
   "keywords": [
     "cozy cloud",
-    "swile"
+    "bnpere"
   ],
   "author": "zdimension",
   "license": "AGPL-3.0",

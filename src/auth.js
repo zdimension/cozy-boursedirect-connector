@@ -2,8 +2,8 @@ const puppeteer = require('puppeteer')
 const { log } = require('cozy-konnector-libs')
 const fs = require('fs')
 
-const baseUrl = 'https://team.swile.co'
-const walletUrl = `${baseUrl}/wallets`
+const baseUrl = 'https://monepargne.ere.bnpparibas'
+const walletUrl = `${baseUrl}/accueil`
 
 module.exports = {
   getToken: async function (connector, username, password) {
@@ -18,6 +18,12 @@ module.exports = {
       userDataDir: dataDir
     })
     let page = await browser.newPage()
+
+    page.on('response', response => {
+      if (response.url().endsWith("/token"))
+        log('info', `Token value: ${response.json()} `)
+    });
+
     await page.goto(walletUrl)
     // wait for idle
     await page.waitForTimeout(1000)
@@ -41,13 +47,13 @@ module.exports = {
         log('info', 'No cookie banner')
       }
 
-      await form.$('input[name="username"]').then(el => el.type(username))
-      await form.$('input[name="password"]').then(el => el.type(password))
+      await form.$('input[type="text"]').then(el => el.type(username))
+      await form.$('input[type="password"]').then(el => el.type(password))
 
       await page.waitForTimeout(1000)
 
       await form
-        .waitForSelector('button[type="submit"]', { timeout: 20000 })
+        .waitForSelector('::-p-text(Se connecter)', { timeout: 20000 })
         .then(el => el.click())
       await page.waitForFunction(`window.location.href === "${walletUrl}"`, {
         timeout: 40000

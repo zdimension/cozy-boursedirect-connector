@@ -1,13 +1,13 @@
 {
   "version": "0.1.0",
-  "name": "Swile",
+  "name": "BNPERE",
   "type": "konnector",
   "language": "node",
   "icon": "icon.svg",
-  "slug": "swile",
-  "source": "git@github.com:zdimension/cozy-swile-connector.git",
+  "slug": "bnpere",
+  "source": "git@github.com:zdimension/cozy-bnpere-connector.git",
   "editor": "zdimension",
-  "vendor_link": "https://swile.co",
+  "vendor_link": "https://monepargne.ere.bnpparibas",
   "categories": ["banking"],
   "fields": {
     "login": {

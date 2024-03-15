@@ -4,7 +4,7 @@ const {
   BaseKonnector,
   categorize
 } = require('cozy-konnector-libs')
-const { getSwileData } = require('./swile')
+const { getBNPEREData } = require('./bnpere')
 const { getToken } = require('./auth')
 const doctypes = require('cozy-doctypes')
 const { Document, BankAccount, BankTransaction, BankingReconciliator } =
@@ -17,7 +17,7 @@ minilog.suggest.allow('cozy-client', 'info')
 
 const reconciliator = new BankingReconciliator({ BankAccount, BankTransaction })
 
-class SwileConnector extends BaseKonnector {
+class BNPEREConnector extends BaseKonnector {
   async fetch(fields) {
     if (process.env.NODE_ENV !== 'standalone') {
       cozyClient.new.login()
@@ -28,7 +28,7 @@ class SwileConnector extends BaseKonnector {
     }
     try {
       const token = await getToken(this, fields.login, fields.password)
-      const [cards, ops] = await getSwileData(fields.login, token)
+      const [cards, ops] = await getBNPEREData(fields.login, token)
 
       log('info', 'Successfully fetched data')
       log('info', 'Parsing ...')
@@ -54,7 +54,7 @@ class SwileConnector extends BaseKonnector {
         vendorId: card.id,
         number: card.id,
         currency: card.balance.currency.iso_3,
-        institutionLabel: 'Swile',
+        institutionLabel: 'BNPERE',
         label: card.label,
         balance: card.balance.value,
         type: 'Checkings'
@@ -82,7 +82,7 @@ class SwileConnector extends BaseKonnector {
   }
 }
 
-const connector = new SwileConnector({
+const connector = new BNPEREConnector({
   cheerio: false,
   json: false
 })
