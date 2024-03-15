@@ -40,14 +40,19 @@ class BNPEREApi {
       op => op.statusCode === 'Termine'
     )
     log('info', JSON.stringify(rawOps))
-    
+
     await Promise.all(
       rawOps.map(async op => {
-        const detail = await this.fetch(`companies/${company}/operations/detail/${op.id}`)
+        const detail = await this.fetch(
+          `companies/${company}/operations/detail/${op.id}`
+        )
         const plans = detail.destination.plans
         if (plans.length !== 1) {
-          log('warn', `Unexpected number of plans: ${plans.length} for op ${op.id}`)
-          return;
+          log(
+            'warn',
+            `Unexpected number of plans: ${plans.length} for op ${op.id}`
+          )
+          return
         }
         const plan = plans[0]
         op.company = company
@@ -68,9 +73,13 @@ async function getBNPEREData(email, token) {
         return p
       })
     }),
-    (await Promise.all(companies.map(async c => {
-      return await api.getAllOperations(c.companyId)
-    }))).flat()
+    (
+      await Promise.all(
+        companies.map(async c => {
+          return await api.getAllOperations(c.companyId)
+        })
+      )
+    ).flat()
   ]
 }
 

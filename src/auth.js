@@ -19,15 +19,13 @@ module.exports = {
     })
     let page = await browser.newPage()
 
-
-    let access_token = null;
+    let access_token = null
 
     page.on('response', async response => {
       const req = response.request()
       // check if there's an Authorization header
       const authHeader = req.headers()['authorization']
-      if (authHeader)
-        access_token = authHeader.split(' ')[1].trim()
+      if (authHeader) access_token = authHeader.split(' ')[1].trim()
       else if (response.url().endsWith('/token'))
         access_token = (await response.json()).access_token
     })
@@ -55,12 +53,16 @@ module.exports = {
         //
       }
       // original auth code from @Guekka
-      
+
       // find element with text "Je me connecte" and click on it
-      const logbtn = await page.waitForSelector('::-p-text(Je me connecte)', { timeout: 20000 })
+      const logbtn = await page.waitForSelector('::-p-text(Je me connecte)', {
+        timeout: 20000
+      })
       await Promise.all([page.waitForNavigation(), logbtn.click()])
 
-      await page.$('input[placeholder="Adresse e-mail"]').then(el => el.type(username))
+      await page
+        .$('input[placeholder="Adresse e-mail"]')
+        .then(el => el.type(username))
       await page.$('input[type="password"]').then(el => el.type(password))
 
       await page.waitForTimeout(1000)

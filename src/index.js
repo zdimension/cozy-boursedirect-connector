@@ -66,7 +66,7 @@ class BNPEREConnector extends BaseKonnector {
 
   parseOps(ops) {
     return ops.map(op => {
-      const full_id = `${op.company}999${op.card}`;
+      const full_id = `${op.company}999${op.card}`
       const date = op.dateTime + '.000Z'
       return {
         vendorId: op.id,
