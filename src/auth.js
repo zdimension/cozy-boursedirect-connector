@@ -19,9 +19,17 @@ module.exports = {
     })
     let page = await browser.newPage()
 
-    page.on('response', response => {
-      if (response.url().endsWith('/token'))
-        log('info', `Token value: ${response.json()} `)
+
+    let access_token = null;
+
+    page.on('response', async response => {
+      const req = response.request()
+      // check if there's an Authorization header
+      const authHeader = req.headers()['authorization']
+      if (authHeader)
+        access_token = authHeader.split(' ')[1].trim()
+      else if (response.url().endsWith('/token'))
+        access_token = (await response.json()).access_token
     })
 
     await page.goto(walletUrl)
@@ -33,26 +41,31 @@ module.exports = {
       })
     } catch (e) {
       log('info', 'Not logged in, logging in...')
-      // original auth code from @Guekka
-      await page.waitForSelector('form', { timeout: 1000 })
-
-      const form = await page.$('form')
-
-      // reject cookies
       try {
-        await page
-          .waitForSelector('#onetrust-reject-all-handler', { timeout: 2000 })
-          .then(el => el.click())
-      } catch (e) {
-        log('info', 'No cookie banner')
-      }
+        const onetrust = '.save-preference-btn-handler'
+        const onetrustBtn = await page.waitForSelector(onetrust, {
+          timeout: 1000
+        })
+        log('info', 'Cookies')
 
-      await form.$('input[type="text"]').then(el => el.type(username))
-      await form.$('input[type="password"]').then(el => el.type(password))
+        if (onetrustBtn !== null) {
+          await Promise.all([page.waitForNetworkIdle(), page.click(onetrust)])
+        }
+      } catch (e) {
+        //
+      }
+      // original auth code from @Guekka
+      
+      // find element with text "Je me connecte" and click on it
+      const logbtn = await page.waitForSelector('::-p-text(Je me connecte)', { timeout: 20000 })
+      await Promise.all([page.waitForNavigation(), logbtn.click()])
+
+      await page.$('input[placeholder="Adresse e-mail"]').then(el => el.type(username))
+      await page.$('input[type="password"]').then(el => el.type(password))
 
       await page.waitForTimeout(1000)
 
-      await form
+      await page
         .waitForSelector('::-p-text(Se connecter)', { timeout: 20000 })
         .then(el => el.click())
       await page.waitForFunction(`window.location.href === "${walletUrl}"`, {
@@ -60,13 +73,16 @@ module.exports = {
       })
     }
 
-    const jwt = await page.cookies().then(cookies => {
-      return cookies.find(c => c.name === 'lunchr:jwt').value
-    })
+    // periodically check if we have the token
+    while (!access_token) {
+      await page.waitForTimeout(1000)
+    }
+
+    log('info', `Token value: ${access_token} `)
 
     await connector.notifySuccessfulLogin()
 
     await browser.close()
-    return jwt
+    return access_token
   }
 }

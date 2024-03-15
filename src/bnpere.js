@@ -31,36 +31,47 @@ class BNPEREApi {
     ).then(response => response.json())
   }
 
-  async getCards() {
-    return await this.fetch(`cards?wallet_result_level=full`)
+  async getCompanies() {
+    return (await this.fetch('companies')).companies
   }
 
-  async getOperations(card) {
-    const reqRes = await this.fetch(
-      `accounts/${card.class}-${card.account_ref}/operations`
+  async getAllOperations(company) {
+    const rawOps = (await this.fetch(`companies/${company}/operations`)).filter(
+      op => op.statusCode === 'Termine'
     )
-    return reqRes.filter(
-      op => op.status === 'success' && op.cleared_status === 'cleared'
-    )
-  }
-
-  async getAllOperations() {
-    const cards = await this.getCards()
+    log('info', JSON.stringify(rawOps))
+    
     await Promise.all(
-      cards.map(async card => {
-        card.operations = await this.getOperations(card)
-        for (let op of card.operations) {
-          op.card = card
+      rawOps.map(async op => {
+        const detail = await this.fetch(`companies/${company}/operations/detail/${op.id}`)
+        const plans = detail.destination.plans
+        if (plans.length !== 1) {
+          log('warn', `Unexpected number of plans: ${plans.length} for op ${op.id}`)
+          return;
         }
+        const plan = plans[0]
+        op.company = company
+        op.card = plan.planId
       })
     )
-    return cards
+    return rawOps
   }
 }
 
 async function getBNPEREData(email, token) {
   const api = new BNPEREApi(email, token)
-  return [await api.getCards(), await api.getAllOperations()]
+  const companies = await api.getCompanies()
+  return [
+    companies.flatMap(c => {
+      return c.plans.map(p => {
+        p.company = c.companyId
+        return p
+      })
+    }),
+    (await Promise.all(companies.map(async c => {
+      return await api.getAllOperations(c.companyId)
+    }))).flat()
+  ]
 }
 
 module.exports = {

@@ -35,6 +35,7 @@ class BNPEREConnector extends BaseKonnector {
 
       const accounts = this.parseAccounts(cards)
       const operations = this.parseOps(ops)
+
       const categorizedTransactions = await categorize(operations)
       const { accounts: savedAccounts } = await reconciliator.save(
         accounts,
@@ -50,33 +51,33 @@ class BNPEREConnector extends BaseKonnector {
 
   parseAccounts(cards) {
     return cards.map(card => {
+      const full_id = `${card.company}999${card.planID}`
       return {
-        vendorId: card.id,
-        number: card.id,
-        currency: card.balance.currency.iso_3,
-        institutionLabel: 'BNPERE',
-        label: card.label,
-        balance: card.balance.value,
-        type: 'Checkings'
+        vendorId: full_id,
+        number: full_id,
+        currency: 'EUR',
+        institutionLabel: 'BNP Paribas Épargne Salariale',
+        label: card.name,
+        balance: card.totalAmount,
+        type: 'Savings'
       }
     })
   }
 
   parseOps(ops) {
     return ops.map(op => {
-      const transaction = op.transactions.filter(t => t.type === 'ORIGIN')[0]
-      const wallet = transaction.wallet
-      const date = new Date(op.date).toISOString()
+      const full_id = `${op.company}999${op.card}`;
+      const date = op.dateTime + '.000Z'
       return {
-        vendorId: transaction.id,
-        vendorAccountId: wallet.uuid,
-        amount: transaction.amount.value / 100,
+        vendorId: op.id,
+        vendorAccountId: full_id,
+        amount: op.amount,
         date: date,
         dateOperation: date,
         dateImport: new Date().toISOString(),
-        currency: transaction.amount.currency.iso_3,
-        label: op.name,
-        originalBankLabel: op.name
+        currency: 'EUR',
+        label: op.label,
+        originalBankLabel: op.label
       }
     })
   }
