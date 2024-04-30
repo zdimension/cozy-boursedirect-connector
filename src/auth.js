@@ -5,7 +5,6 @@ const fs = require('fs')
 const baseUrl = 'https://www.boursedirect.fr/fr'
 const loginUrl = `${baseUrl}/login`
 const walletUrl = `${baseUrl}/page/portefeuille`
-const invUrl = `${baseUrl}/page/inventaire`
 
 module.exports = {
   getToken: async function (connector, username, password) {
@@ -25,12 +24,13 @@ module.exports = {
     // wait for idle
     await page.waitForTimeout(1000)
 
-    const getToken = async() => await page.cookies().then(cookies => {
-      return cookies.find(c => c.name === 'CAPITOL').value
-    });
+    const getToken = async () =>
+      await page.cookies().then(cookies => {
+        return cookies.find(c => c.name === 'CAPITOL').value
+      })
 
-    let token = await getToken();
-    
+    let token = await getToken()
+
     try {
       await page.waitForFunction(`window.location.href === "${walletUrl}"`, {
         timeout: 1000
@@ -39,7 +39,7 @@ module.exports = {
       log('info', 'Not logged in, logging in...')
 
       try {
-        await page.click("#didomi-notice-agree-button")
+        await page.click('#didomi-notice-agree-button')
       } catch (e) {
         //
       }
@@ -57,7 +57,7 @@ module.exports = {
       await page.keyboard.press('Enter')
 
       let start = Date.now()
-      while (true) {
+      for (;;) {
         let newToken = await getToken()
         if (newToken && newToken !== token && !newToken.includes('-')) {
           token = newToken
