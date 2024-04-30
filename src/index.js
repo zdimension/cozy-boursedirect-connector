@@ -4,7 +4,7 @@ const {
   BaseKonnector,
   categorize
 } = require('cozy-konnector-libs')
-const { getBNPEREData } = require('./bnpere')
+const { getBourseDirectData } = require('./boursedirect')
 const { getToken } = require('./auth')
 const doctypes = require('cozy-doctypes')
 const { Document, BankAccount, BankTransaction, BankingReconciliator } =
@@ -17,7 +17,7 @@ minilog.suggest.allow('cozy-client', 'info')
 
 const reconciliator = new BankingReconciliator({ BankAccount, BankTransaction })
 
-class BNPEREConnector extends BaseKonnector {
+class BourseDirectConnector extends BaseKonnector {
   async fetch(fields) {
     if (process.env.NODE_ENV !== 'standalone') {
       cozyClient.new.login()
@@ -28,13 +28,15 @@ class BNPEREConnector extends BaseKonnector {
     }
     try {
       const token = await getToken(this, fields.login, fields.password)
-      const [cards, ops] = await getBNPEREData(fields.login, token)
+      const [cards, ops] = await getBourseDirectData(token)
 
       log('info', 'Successfully fetched data')
       log('info', 'Parsing ...')
 
       const accounts = this.parseAccounts(cards)
+      log('info', JSON.stringify(accounts))
       const operations = this.parseOps(ops)
+      log('info', JSON.stringify(operations))
 
       const categorizedTransactions = await categorize(operations)
       const { accounts: savedAccounts } = await reconciliator.save(
@@ -51,14 +53,13 @@ class BNPEREConnector extends BaseKonnector {
 
   parseAccounts(cards) {
     return cards.map(card => {
-      const full_id = `${card.company}999${card.planID}`
       return {
-        vendorId: full_id,
-        number: full_id,
+        vendorId: card.id,
+        number: card.id,
         currency: 'EUR',
-        institutionLabel: 'BNP Paribas Épargne Salariale',
+        institutionLabel: 'Bourse Direct',
         label: card.name,
-        balance: card.totalAmount,
+        balance: card.balance,
         type: 'Savings'
       }
     })
@@ -66,14 +67,12 @@ class BNPEREConnector extends BaseKonnector {
 
   parseOps(ops) {
     return ops.map(op => {
-      const full_id = `${op.company}999${op.card}`
-      const date = op.dateTime + '.000Z'
       return {
         vendorId: op.id,
-        vendorAccountId: full_id,
+        vendorAccountId: op.account,
         amount: op.amount,
-        date: date,
-        dateOperation: date,
+        date: op.date,
+        dateOperation: op.date,
         dateImport: new Date().toISOString(),
         currency: 'EUR',
         label: op.label,
@@ -83,7 +82,7 @@ class BNPEREConnector extends BaseKonnector {
   }
 }
 
-const connector = new BNPEREConnector({
+const connector = new BourseDirectConnector({
   cheerio: false,
   json: false
 })

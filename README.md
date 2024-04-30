@@ -1,4 +1,4 @@
-[Cozy][cozy] BNPERE Konnector
+[Cozy][cozy] BourseDirect Konnector
 =======================================
 
 What's Cozy?
@@ -11,7 +11,7 @@ What's Cozy?
 What is this konnector about ?
 ------------------------------
 
-This konnector retrieves your banking data (cards and operations) from your BNPERE account.
+This konnector retrieves your banking data (cards and operations) from your BourseDirect account.
 
 ### Run and test
 
@@ -60,7 +60,7 @@ You can reach the Cozy Community by:
 License
 -------
 
-cozy-bnpere-connector is developed by @zdimension and distributed under the [AGPL v3 license][agpl-3.0].
+cozy-boursedirect-connector is developed by @zdimension and distributed under the [AGPL v3 license][agpl-3.0].
 
 Bits taken from [cozy-konnector-boursorama](https://github.com/konnectors/boursorama) and [cozy-plutus-connector](https://github.com/Guekka/cozy-plutus-connector).
 

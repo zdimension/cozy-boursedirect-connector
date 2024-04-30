@@ -1,14 +1,14 @@
 {
-  "name": "cozy-bnpere-connector",
+  "name": "cozy-boursedirect-connector",
   "version": "0.1.0",
   "description": "",
   "repository": {
     "type": "git",
-    "url": "git@github.com:zdimension/cozy-bnpere-connector.git"
+    "url": "git@github.com:zdimension/cozy-boursedirect-connector.git"
   },
   "keywords": [
     "cozy cloud",
-    "bnpere"
+    "boursedirect"
   ],
   "author": "zdimension",
   "license": "AGPL-3.0",
@@ -40,7 +40,8 @@
   },
   "dependencies": {
     "cozy-konnector-libs": "5.2.1",
-    "puppeteer": "^20.0.0"
+    "puppeteer": "^20.0.0",
+    "jsdom": "^24.0.0"
   },
   "devDependencies": {
     "cozy-jobs-cli": "2.0.3",
