@@ -65,6 +65,7 @@ module.exports = {
         }
         await page.waitForTimeout(1000)
         if (Date.now() - start > 40000) {
+          await browser.close()
           throw new Error('Login timeout')
         }
       }
