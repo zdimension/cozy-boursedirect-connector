@@ -41,7 +41,8 @@
   "dependencies": {
     "cozy-konnector-libs": "5.2.1",
     "puppeteer": "^20.0.0",
-    "jsdom": "^24.0.0"
+    "jsdom": "^24.0.0",
+    "moment": "2.29.4"
   },
   "devDependencies": {
     "cozy-jobs-cli": "2.0.3",
